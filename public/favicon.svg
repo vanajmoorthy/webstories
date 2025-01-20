@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="295" height="295"><svg width="295" height="295" viewBox="0 0 295 295" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="147.5" cy="147.5" r="147.5" fill="url(#paint0_linear_2008_2)"></circle>
+<defs>
+<linearGradient id="SvgjsLinearGradient1001" x1="147" y1="-79" x2="147.5" y2="295" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FAB5AA"></stop>
+<stop offset="1" stop-color="#FFE3DF"></stop>
+</linearGradient>
+</defs>
+</svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
+@media (prefers-color-scheme: dark) { :root { filter: none; } }
+</style></svg>
