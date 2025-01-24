@@ -4,6 +4,7 @@ import WebstoryPage from "./app/webstory/page"
 import LoginPage from "./app/login/page"
 import SignUpPage from "./app/signup/page"
 import LogoutPage from "./app/logout/page"
+import EditablePage from "./app/editable-page/page"
 import { ProtectedRoute } from "./components/ProtectedRoute"
 import { AuthProvider } from "@/context/AuthContext"
 
@@ -21,6 +22,10 @@ function App() {
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/editable-page" element={<EditablePage />} />
+          </Route>
 
           <Route element={<ProtectedRoute />}>
             <Route path="/logout" element={<LogoutPage />} />

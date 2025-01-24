@@ -4,10 +4,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-import Image from "@/assets/signup.png"
+import Image from "@/assets/login.png"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
-import { useState } from "react"
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("")
@@ -22,7 +22,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     try {
       await login(email, password)
 
-      navigate("/webstory")
+      navigate("/editable-page")
     } catch (err: any) {
       console.error(err)
       setError(err.message || "An error occurred")
@@ -31,12 +31,12 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden">
-        <CardContent className="grid p-0 md:grid-cols-2">
+        <CardContent className="grid p-0 md:grid-cols-[4fr_5fr]">
           <form className="p-6 md:p-8" onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-balance text-muted-foreground">Login to your webstories.live account</p>
+                <h1 className="text-2xl font-bold">Welcome back!</h1>
+                <p className="text-balance text-muted-foreground">Login to your Webstories account</p>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
