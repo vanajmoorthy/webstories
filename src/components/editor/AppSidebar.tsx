@@ -1,8 +1,4 @@
-"use client"
-
-import * as React from "react"
-import { Command } from "lucide-react"
-
+import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarHeader,
@@ -11,24 +7,37 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
+import { useWebstoryStore } from "@/stores/webstoryStore"
+import { HeaderComponent } from "@/types/webstory"
+import { Command } from "lucide-react"
+import { useState } from "react"
 
 import { HeaderCard } from "./HeaderCard"
-import { useState } from "react"
 import { HeaderConfig } from "./HeaderConfig"
 
-interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  headerData: {
-    heading: string
-    backgroundColor: string
-  }
-  onHeaderChange: (newData: { heading?: string; backgroundColor?: string }) => void
-}
-
-export function AppSidebar({ headerData, onHeaderChange, ...props }: AppSidebarProps) {
+export function AppSidebar() {
   const [showHeaderMenu, setShowHeaderMenu] = useState(false)
+  const [selectedHeader, setSelectedHeader] = useState<HeaderComponent | null>(null)
+  const components = useWebstoryStore((state) => state.components)
+  const addComponent = useWebstoryStore((state) => state.addComponent)
+
+  const handleAddHeader = () => {
+    const newHeader: HeaderComponent = {
+      id: `${Date.now()}`,
+      type: "header",
+      backgroundColor: "#ffaaaa",
+      order: 1,
+      title: "New Header",
+      subtitle: "Subtitle",
+      titleStyle: { fontSize: "20px", fontFamily: "Arial", color: "black" },
+    }
+    addComponent(newHeader)
+  }
+
+  const headerComponent = components.find((component) => component.type === "header")
 
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar variant="inset">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -47,22 +56,23 @@ export function AppSidebar({ headerData, onHeaderChange, ...props }: AppSidebarP
       </SidebarHeader>
       <SidebarSeparator />
 
-      {!showHeaderMenu ? (
+      {headerComponent && (
         <div className="p-2">
           <HeaderCard
             onClick={() => {
+              setSelectedHeader(headerComponent)
               setShowHeaderMenu(true)
             }}
           />
         </div>
-      ) : (
-        <HeaderConfig
-          onChange={() => { }}
-          onBack={() => {
-            setShowHeaderMenu(false)
-          }}
-          data={headerData}
-        />
+      )}
+
+      <div className="p-2">
+        <Button onClick={handleAddHeader}>Add Header</Button>
+      </div>
+
+      {showHeaderMenu && selectedHeader && (
+        <HeaderConfig headerComponent={selectedHeader} onBack={() => setShowHeaderMenu(false)} />
       )}
     </Sidebar>
   )

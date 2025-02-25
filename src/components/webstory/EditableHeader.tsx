@@ -1,43 +1,47 @@
-type EditableHeaderProps = {
-  heading: string
-  subheading?: string
-  backgroundColor?: string
-  onHeadingChange: (newHeading: string) => void
-  onSubheadingChange?: (newSubheading: string) => void
-  onBackgroundColorChange: (newColor: string) => void
-}
+import { useWebstoryStore } from "@/stores/webstoryStore"
+import { useState } from "react"
 
 export function EditableHeader({
+  id,
   heading,
   subheading,
-  backgroundColor = "#ffffff",
-  onHeadingChange,
-  onSubheadingChange,
-  onBackgroundColorChange,
-}: EditableHeaderProps) {
-  return (
-    <header className="p-8 rounded-lg mb-8 relative group" style={{ backgroundColor }}>
-      <div className=" mx-auto">
-        <h1
-          className="text-4xl font-bold mb-4 cursor-text"
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(e) => onHeadingChange(e.target.textContent || "")}
-        >
-          {heading}
-        </h1>
+  backgroundColor,
+}: {
+  id: string
+  heading: string
+  subheading: string
+  backgroundColor: string
+}) {
+  const [isEditing, setIsEditing] = useState(false)
+  const [localHeading, setLocalHeading] = useState(heading)
+  const [localSubheading, setLocalSubheading] = useState(subheading)
+  const [localBackgroundColor, setLocalBackgroundColor] = useState(backgroundColor)
+  const updateComponent = useWebstoryStore((state) => state.updateComponent)
 
-        {subheading && (
-          <p
-            className="text-xl text-muted-foreground cursor-text"
-            contentEditable
-            suppressContentEditableWarning
-            onBlur={(e) => onSubheadingChange?.(e.target.textContent || "")}
-          >
-            {subheading}
-          </p>
-        )}
-      </div>
-    </header>
+  const handleSave = () => {
+    updateComponent(id, {
+      title: localHeading,
+      subtitle: localSubheading,
+      backgroundColor: localBackgroundColor,
+    })
+    setIsEditing(false)
+  }
+
+  return (
+    <div style={{ backgroundColor }} className="p-4">
+      {isEditing ? (
+        <div>
+          <input value={localHeading} onChange={(e) => setLocalHeading(e.target.value)} />
+          <input value={localSubheading} onChange={(e) => setLocalSubheading(e.target.value)} />
+          <input type="color" value={localBackgroundColor} onChange={(e) => setLocalBackgroundColor(e.target.value)} />
+          <button onClick={handleSave}>Save</button>
+        </div>
+      ) : (
+        <div onClick={() => setIsEditing(true)}>
+          <h1>{heading}</h1>
+          <h2>{subheading}</h2>
+        </div>
+      )}
+    </div>
   )
 }

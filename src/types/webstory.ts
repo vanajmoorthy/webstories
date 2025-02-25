@@ -1,4 +1,3 @@
-// types/webstory.ts
 export type WebstoryComponent = TextComponent | TimelineComponent | HeaderComponent
 
 type BaseComponent = {

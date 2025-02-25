@@ -1,8 +1,10 @@
-"use client"
-
 import { Card, CardContent } from "@/components/ui/card"
 
-export function HeaderCard({ onClick }: { onClick: () => void }) {
+interface HeaderCardProps {
+  onClick: () => void
+}
+
+export function HeaderCard({ onClick }: HeaderCardProps) {
   return (
     <Card className="mt-2 cursor-pointer" onClick={onClick}>
       <CardContent className="p-3">

@@ -1,12 +1,11 @@
-// app/editable-page.tsx
-"use client"
-
-import { useState } from "react"
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { EditableHeader } from "@/components/webstory/EditableHeader"
 import { AppSidebar } from "@/components/editor/AppSidebar"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { EditableHeader } from "@/components/webstory/EditableHeader"
+import { useWebstoryStore } from "@/stores/webstoryStore"
+import { useState } from "react"
 
 export default function EditablePage() {
+  const components = useWebstoryStore((state) => state.components)
   const [headerData, setHeaderData] = useState({
     heading: "My Webstory Header",
     subheading: "A customizable header section",
@@ -20,14 +19,20 @@ export default function EditablePage() {
       <SidebarInset>
         <SidebarTrigger className="absolute left-2 top-2 z-10" />
         <main className="z-10">
-          <EditableHeader
-            heading={headerData.heading}
-            subheading={headerData.subheading}
-            backgroundColor={headerData.backgroundColor}
-            onHeadingChange={(newHeading) => setHeaderData((prev) => ({ ...prev, heading: newHeading }))}
-            onSubheadingChange={(newSubheading) => setHeaderData((prev) => ({ ...prev, subheading: newSubheading }))}
-            onBackgroundColorChange={(newColor) => setHeaderData((prev) => ({ ...prev, backgroundColor: newColor }))}
-          />
+          {components.map((component) => {
+            if (component.type === "header") {
+              return (
+                <EditableHeader
+                  key={component.id}
+                  id={component.id}
+                  heading={component.title}
+                  subheading={component.subtitle}
+                  backgroundColor={component.backgroundColor}
+                />
+              )
+            }
+            return null
+          })}
         </main>
       </SidebarInset>
     </SidebarProvider>
