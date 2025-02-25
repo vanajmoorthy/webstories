@@ -1,13 +1,12 @@
-import { cn } from "@/lib/utils"
+import Image from "@/assets/login.png"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-import Image from "@/assets/login.png"
+import { useAuth } from "@/context/AuthContext"
+import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useAuth } from "@/context/AuthContext"
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState("")

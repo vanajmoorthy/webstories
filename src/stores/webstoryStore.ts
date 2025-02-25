@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-import { WebstoryComponent } from "../types/webstory"
+import { HeaderComponent, WebstoryComponent } from "../types/webstory"
 
 type WebstoryState = {
   components: WebstoryComponent[]
@@ -9,19 +9,30 @@ type WebstoryState = {
 }
 
 export const useWebstoryStore = create<WebstoryState>((set) => ({
-  components: [],
+  components: [
+    {
+      id: `${Date.now()}`,
+      type: "header",
+      backgroundColor: "#ffaaaa",
+      order: 1,
+      title: "Default Header",
+      subtitle: "Subtitle",
+      titleStyle: { fontSize: "20px", fontFamily: "Arial", color: "black" },
+    } as HeaderComponent,
+  ],
   addComponent: (component: WebstoryComponent) =>
     set((state: WebstoryState) => {
-      // If there's already a header, replace it, otherwise add the new one
-      const existingHeader = state.components.find((comp) => comp.type === "header")
-      if (existingHeader) {
-        return {
-          components: state.components.map((comp) => (comp.type === "header" ? { ...comp, ...component } : comp)),
+      if (component.type === "header") {
+        const existingHeader = state.components.find((comp) => comp.type === "header")
+        if (existingHeader) {
+          return {
+            components: state.components,
+          }
         }
-      } else {
-        return {
-          components: [...state.components, component],
-        }
+      }
+
+      return {
+        components: [...state.components, component],
       }
     }),
   updateComponent: (id: string, updates: Partial<WebstoryComponent>) =>

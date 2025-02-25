@@ -30,7 +30,7 @@ export function EditableHeader({
   return (
     <div style={{ backgroundColor }} className="p-4">
       {isEditing ? (
-        <div>
+        <div className="flex flex-col">
           <input value={localHeading} onChange={(e) => setLocalHeading(e.target.value)} />
           <input value={localSubheading} onChange={(e) => setLocalSubheading(e.target.value)} />
           <input type="color" value={localBackgroundColor} onChange={(e) => setLocalBackgroundColor(e.target.value)} />

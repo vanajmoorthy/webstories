@@ -1,11 +1,12 @@
-import Header from "../../components/Header"
-import TimeSince from "../../components/TimeSince"
-import Text from "../../components/Text"
-import Timeline from "../../components/Timeline"
-import SlideshowModal from "../../components/SlideshowModal"
-import Footer from "../../components/Footer"
 import { useEffect, useRef, useState } from "react"
 import styled, { createGlobalStyle } from "styled-components"
+
+import Footer from "../../components/old/Footer"
+import Header from "../../components/old/Header"
+import SlideshowModal from "../../components/old/SlideshowModal"
+import Text from "../../components/old/Text"
+import TimeSince from "../../components/old/TimeSince"
+import Timeline from "../../components/old/Timeline"
 import timelineData from "../../imageData.json"
 
 const GlobalStyle = createGlobalStyle`

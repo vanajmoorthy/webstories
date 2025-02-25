@@ -8,33 +8,37 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { useWebstoryStore } from "@/stores/webstoryStore"
-import { HeaderComponent } from "@/types/webstory"
+import { HeaderComponent, TextComponent } from "@/types/webstory"
 import { Command } from "lucide-react"
 import { useState } from "react"
 
+import { ComponentModal } from "./ComponentModal"
 import { HeaderCard } from "./HeaderCard"
 import { HeaderConfig } from "./HeaderConfig"
+import { TextCard } from "./TextCard"
+
+const AddComponentButton = () => {
+  const [isModalOpen, setModalOpen] = useState(false)
+
+  const openModal = () => setModalOpen(true)
+  const closeModal = () => setModalOpen(false)
+
+  return (
+    <div>
+      <Button onClick={openModal}>Add Component</Button>
+      {isModalOpen && <ComponentModal closeModal={closeModal} />}
+    </div>
+  )
+}
 
 export function AppSidebar() {
   const [showHeaderMenu, setShowHeaderMenu] = useState(false)
   const [selectedHeader, setSelectedHeader] = useState<HeaderComponent | null>(null)
   const components = useWebstoryStore((state) => state.components)
-  const addComponent = useWebstoryStore((state) => state.addComponent)
-
-  const handleAddHeader = () => {
-    const newHeader: HeaderComponent = {
-      id: `${Date.now()}`,
-      type: "header",
-      backgroundColor: "#ffaaaa",
-      order: 1,
-      title: "New Header",
-      subtitle: "Subtitle",
-      titleStyle: { fontSize: "20px", fontFamily: "Arial", color: "black" },
-    }
-    addComponent(newHeader)
-  }
 
   const headerComponent = components.find((component) => component.type === "header")
+
+  const textComponents = components.filter((component) => component.type === "text")
 
   return (
     <Sidebar variant="inset">
@@ -68,7 +72,13 @@ export function AppSidebar() {
       )}
 
       <div className="p-2">
-        <Button onClick={handleAddHeader}>Add Header</Button>
+        {textComponents.map((textComponent: TextComponent) => (
+          <TextCard key={textComponent.id} onClick={() => { }} />
+        ))}
+      </div>
+
+      <div className="p-2">
+        <AddComponentButton />
       </div>
 
       {showHeaderMenu && selectedHeader && (
