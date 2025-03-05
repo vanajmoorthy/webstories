@@ -45,5 +45,12 @@ export type HeaderComponent = BaseComponent & {
     fontSize: string
     fontFamily: string
     color: string
+    textAlign: "left" | "right" | "center"
+  }
+  subtitleStyle: {
+    fontSize: string
+    fontFamily: string
+    color: string
+    textAlign: "left" | "right" | "center"
   }
 }

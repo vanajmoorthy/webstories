@@ -3,7 +3,6 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { EditableHeader } from "@/components/webstory/EditableHeader"
 import { EditableText } from "@/components/webstory/EditableText"
 import { useWebstoryStore } from "@/stores/webstoryStore"
-import { useState } from "react"
 
 export default function EditablePage() {
   const components = useWebstoryStore((state) => state.components)
@@ -13,8 +12,8 @@ export default function EditablePage() {
       <AppSidebar />
 
       <SidebarInset>
-        <SidebarTrigger className="absolute left-2 top-2 z-10" />
-        <main className="z-10">
+        <SidebarTrigger className="absolute left-2 top-2 z-20" />
+        <main className="z-10 h-full bg-white">
           {components.map((component) => {
             if (component.type === "header") {
               return (
@@ -24,6 +23,8 @@ export default function EditablePage() {
                   heading={component.title}
                   subheading={component.subtitle}
                   backgroundColor={component.backgroundColor}
+                  titleStyle={component.titleStyle}
+                  subtitleStyle={component.subtitleStyle}
                 />
               )
             }

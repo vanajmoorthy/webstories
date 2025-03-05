@@ -10,34 +10,30 @@ import {
 import { useWebstoryStore } from "@/stores/webstoryStore"
 import { HeaderComponent, TextComponent } from "@/types/webstory"
 import { Command } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { ComponentModal } from "./ComponentModal"
+import { ConfigPanel } from "./ConfigPanel"
 import { HeaderCard } from "./HeaderCard"
 import { HeaderConfig } from "./HeaderConfig"
+import { SidebarContent } from "./SidebarContent"
 import { TextCard } from "./TextCard"
 
 const AddComponentButton = () => {
   const [isModalOpen, setModalOpen] = useState(false)
-
-  const openModal = () => setModalOpen(true)
-  const closeModal = () => setModalOpen(false)
-
   return (
     <div>
-      <Button onClick={openModal}>Add Component</Button>
-      {isModalOpen && <ComponentModal closeModal={closeModal} />}
+      <Button onClick={() => setModalOpen(true)}>Add Component</Button>
+      {isModalOpen && <ComponentModal closeModal={() => setModalOpen(false)} />}
     </div>
   )
 }
 
 export function AppSidebar() {
-  const [showHeaderMenu, setShowHeaderMenu] = useState(false)
-  const [selectedHeader, setSelectedHeader] = useState<HeaderComponent | null>(null)
+  const [activeConfig, setActiveConfig] = useState<string | null>(null)
+  const [showHeaderConfig, setShowHeaderConfig] = useState(false)
   const components = useWebstoryStore((state) => state.components)
-
   const headerComponent = components.find((component) => component.type === "header")
-
   const textComponents = components.filter((component) => component.type === "text")
 
   return (
@@ -60,30 +56,37 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarSeparator />
 
-      {headerComponent && (
-        <div className="p-2">
-          <HeaderCard
-            onClick={() => {
-              setSelectedHeader(headerComponent)
-              setShowHeaderMenu(true)
-            }}
-          />
-        </div>
-      )}
+      <div className="relative">
+        <SidebarContent hidden={showHeaderConfig}>
+          {headerComponent && (
+            <HeaderCard
+              onClick={() => {
+                setActiveConfig("header")
+                setShowHeaderConfig((showHeaderConfig) => !showHeaderConfig)
+              }}
+            />
+          )}
 
-      <div className="p-2">
-        {textComponents.map((textComponent: TextComponent) => (
-          <TextCard key={textComponent.id} onClick={() => { }} />
-        ))}
+          {textComponents.map((textComponent) => (
+            <TextCard key={textComponent.id} onClick={() => setActiveConfig(`text-${textComponent.id}`)} />
+          ))}
+
+          <AddComponentButton />
+        </SidebarContent>
+        <ConfigPanel show={showHeaderConfig}>
+          {activeConfig === "header" && headerComponent && (
+            <HeaderConfig
+              headerComponent={headerComponent}
+              onBack={() => {
+                setShowHeaderConfig((showHeaderConfig) => !showHeaderConfig)
+                //setActiveConfig(null)
+              }}
+            />
+          )}
+
+          {activeConfig === "text" && <TextConfig onBack={() => setActiveConfig(null)} />}
+        </ConfigPanel>
       </div>
-
-      <div className="p-2">
-        <AddComponentButton />
-      </div>
-
-      {showHeaderMenu && selectedHeader && (
-        <HeaderConfig headerComponent={selectedHeader} onBack={() => setShowHeaderMenu(false)} />
-      )}
     </Sidebar>
   )
 }

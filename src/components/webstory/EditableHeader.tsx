@@ -6,11 +6,15 @@ export function EditableHeader({
   heading,
   subheading,
   backgroundColor,
+  titleStyle,
+  subtitleStyle,
 }: {
   id: string
   heading: string
   subheading: string
   backgroundColor: string
+  titleStyle: HeaderComponent["titleStyle"]
+  subtitleStyle: HeaderComponent["subtitleStyle"]
 }) {
   const [isEditing, setIsEditing] = useState(false)
   const [localHeading, setLocalHeading] = useState(heading)
@@ -28,7 +32,7 @@ export function EditableHeader({
   }
 
   return (
-    <div style={{ backgroundColor }} className="p-4">
+    <div style={{ backgroundColor }} className="p-4 rounded-t-xl">
       {isEditing ? (
         <div className="flex flex-col">
           <input value={localHeading} onChange={(e) => setLocalHeading(e.target.value)} />
@@ -38,8 +42,26 @@ export function EditableHeader({
         </div>
       ) : (
         <div onClick={() => setIsEditing(true)}>
-          <h1>{heading}</h1>
-          <h2>{subheading}</h2>
+          <h1
+            style={{
+              fontSize: titleStyle.fontSize,
+              fontFamily: titleStyle.fontFamily,
+              color: titleStyle.color,
+              textAlign: titleStyle.textAlign,
+            }}
+          >
+            {heading}
+          </h1>
+          <h2
+            style={{
+              fontSize: subtitleStyle.fontSize,
+              fontFamily: subtitleStyle.fontFamily,
+              color: subtitleStyle.color,
+              textAlign: subtitleStyle.textAlign,
+            }}
+          >
+            {subheading}
+          </h2>
         </div>
       )}
     </div>

@@ -17,7 +17,8 @@ export const useWebstoryStore = create<WebstoryState>((set) => ({
       order: 1,
       title: "Default Header",
       subtitle: "Subtitle",
-      titleStyle: { fontSize: "20px", fontFamily: "Arial", color: "black" },
+      titleStyle: { fontSize: "20px", fontFamily: "Arial", color: "black", textAlign: "center" },
+      subtitleStyle: { fontSize: "16px", fontFamily: "Arial", color: "gray", textAlign: "center" },
     } as HeaderComponent,
   ],
   addComponent: (component: WebstoryComponent) =>
