@@ -14,10 +14,11 @@ import { useEffect, useState } from "react"
 
 import { ComponentModal } from "./ComponentModal"
 import { ConfigPanel } from "./ConfigPanel"
-import { HeaderCard } from "./HeaderCard"
-import { HeaderConfig } from "./HeaderConfig"
+import { HeaderCard } from "./Header/HeaderCard"
+import { HeaderConfig } from "./Header/HeaderConfig"
 import { SidebarContent } from "./SidebarContent"
-import { TextCard } from "./TextCard"
+import { TextCard } from "./Text/TextCard"
+import { TextConfig } from "./Text/TextConfig"
 
 const AddComponentButton = () => {
   const [isModalOpen, setModalOpen] = useState(false)
@@ -31,10 +32,15 @@ const AddComponentButton = () => {
 
 export function AppSidebar() {
   const [activeConfig, setActiveConfig] = useState<string | null>(null)
-  const [showHeaderConfig, setShowHeaderConfig] = useState(false)
+  const [showConfigPanel, setShowConfigPanel] = useState(false)
   const components = useWebstoryStore((state) => state.components)
   const headerComponent = components.find((component) => component.type === "header")
   const textComponents = components.filter((component) => component.type === "text")
+
+  const handleCardClick = (configType: string) => {
+    setActiveConfig(configType)
+    setShowConfigPanel(true)
+  }
 
   return (
     <Sidebar variant="inset">
@@ -57,34 +63,42 @@ export function AppSidebar() {
       <SidebarSeparator />
 
       <div className="relative">
-        <SidebarContent hidden={showHeaderConfig}>
+        <SidebarContent hidden={showConfigPanel}>
           {headerComponent && (
             <HeaderCard
               onClick={() => {
-                setActiveConfig("header")
-                setShowHeaderConfig((showHeaderConfig) => !showHeaderConfig)
+                handleCardClick("header")
               }}
             />
           )}
 
           {textComponents.map((textComponent) => (
-            <TextCard key={textComponent.id} onClick={() => setActiveConfig(`text-${textComponent.id}`)} />
+            <TextCard key={textComponent.id} onClick={() => handleCardClick(`text-${textComponent.id}`)} />
           ))}
 
           <AddComponentButton />
         </SidebarContent>
-        <ConfigPanel show={showHeaderConfig}>
+        <ConfigPanel show={showConfigPanel}>
           {activeConfig === "header" && headerComponent && (
             <HeaderConfig
               headerComponent={headerComponent}
               onBack={() => {
-                setShowHeaderConfig((showHeaderConfig) => !showHeaderConfig)
-                //setActiveConfig(null)
+                setShowConfigPanel(false)
               }}
             />
           )}
-
-          {activeConfig === "text" && <TextConfig onBack={() => setActiveConfig(null)} />}
+          {textComponents.map(
+            (textComponent) =>
+              activeConfig === `text-${textComponent.id}` && (
+                <TextConfig
+                  key={textComponent.id}
+                  textComponent={textComponent}
+                  onBack={() => {
+                    setShowConfigPanel(false)
+                  }}
+                />
+              )
+          )}{" "}
         </ConfigPanel>
       </div>
     </Sidebar>
