@@ -13,7 +13,7 @@ export default function EditablePage() {
 
       <SidebarInset>
         <SidebarTrigger className="absolute left-2 top-2 z-20" />
-        <main className="z-10 h-full bg-white">
+        <main className="z-10 h-full bg-background">
           {components.map((component) => {
             if (component.type === "header") {
               return (

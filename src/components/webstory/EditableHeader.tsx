@@ -1,4 +1,5 @@
 import { useWebstoryStore } from "@/stores/webstoryStore"
+import { HeaderComponent } from "@/types/webstory"
 import { useState } from "react"
 
 export function EditableHeader({

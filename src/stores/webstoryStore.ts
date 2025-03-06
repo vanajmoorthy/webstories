@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-import { HeaderComponent, WebstoryComponent } from "../types/webstory"
+import { HeaderComponent, TextComponent, TimelineComponent, WebstoryComponent } from "../types/webstory"
 
 type WebstoryState = {
   components: WebstoryComponent[]
@@ -38,6 +38,19 @@ export const useWebstoryStore = create<WebstoryState>((set) => ({
     }),
   updateComponent: (id: string, updates: Partial<WebstoryComponent>) =>
     set((state: WebstoryState) => ({
-      components: state.components.map((component) => (component.id === id ? { ...component, ...updates } : component)),
+      components: state.components.map((component) => {
+        if (component.id !== id) return component
+
+        switch (component.type) {
+          case "text":
+            return { ...component, ...updates } as TextComponent
+          case "timeline":
+            return { ...component, ...updates } as TimelineComponent
+          case "header":
+            return { ...component, ...updates } as HeaderComponent
+          default:
+            return component
+        }
+      }),
     })),
 }))

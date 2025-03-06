@@ -1,12 +1,13 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import HomePage from "./app/home/page"
-import WebstoryPage from "./app/webstory/page"
-import LoginPage from "./app/login/page"
-import SignUpPage from "./app/signup/page"
-import LogoutPage from "./app/logout/page"
-import EditablePage from "./app/editable-page/page"
-import { ProtectedRoute } from "./components/ProtectedRoute"
 import { AuthProvider } from "@/context/AuthContext"
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
+
+import EditablePage from "./app/editable-page/page"
+import HomePage from "./app/home/page"
+//import WebstoryPage from "./app/webstory/page"
+import LoginPage from "./app/login/page"
+import LogoutPage from "./app/logout/page"
+import SignUpPage from "./app/signup/page"
+import { ProtectedRoute } from "./components/ProtectedRoute"
 
 function App() {
   return (
@@ -15,10 +16,11 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
 
-          {/* Protect the /webstory route */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/webstory" element={<WebstoryPage />} />
-          </Route>
+          {/* 
+            <Route element={<ProtectedRoute />}>
+              <Route path="/webstory" element={<WebstoryPage />} />
+            </Route>
+          */}
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
