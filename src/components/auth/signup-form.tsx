@@ -1,14 +1,12 @@
-import { useState } from "react"
-import { useAuth } from "@/context/AuthContext"
-
-import pb from "@/lib/pocketbase"
-import { cn } from "@/lib/utils"
+import Image from "@/assets/signup.png"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-import Image from "@/assets/signup.png"
+import { useAuth } from "@/context/AuthContext"
+import pb from "@/lib/pocketbase"
+import { cn } from "@/lib/utils"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 export function SignUpForm({ className, ...props }: React.ComponentProps<"div">) {
@@ -25,7 +23,7 @@ export function SignUpForm({ className, ...props }: React.ComponentProps<"div">)
     try {
       await signUp(email, password, confirmPassword)
 
-      navigate("/editable-page")
+      navigate("/")
     } catch (err: any) {
       console.error(err)
       setError(err.message || "An error occurred")

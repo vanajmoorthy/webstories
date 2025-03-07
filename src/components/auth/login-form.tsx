@@ -21,7 +21,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
     try {
       await login(email, password)
 
-      navigate("/editable-page")
+      navigate("/")
     } catch (err: any) {
       console.error(err)
       setError(err.message || "An error occurred")

@@ -1,7 +1,7 @@
 import { AuthProvider } from "@/context/AuthContext"
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
 
-import EditablePage from "./app/editable-page/page"
+import Editor from "./app/editor/page"
 import HomePage from "./app/home/page"
 //import WebstoryPage from "./app/webstory/page"
 import LoginPage from "./app/login/page"
@@ -14,7 +14,9 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<HomePage />} />
+          </Route>
 
           {/* 
             <Route element={<ProtectedRoute />}>
@@ -26,7 +28,7 @@ function App() {
           <Route path="/signup" element={<SignUpPage />} />
 
           <Route element={<ProtectedRoute />}>
-            <Route path="/editable-page" element={<EditablePage />} />
+            <Route path="/editor/:id" element={<Editor />} />
           </Route>
 
           <Route element={<ProtectedRoute />}>
