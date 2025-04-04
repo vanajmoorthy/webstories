@@ -122,7 +122,11 @@ export function AppSidebar({
           )}
 
           {textComponents.map((textComponent) => (
-            <TextCard key={textComponent.id} onClick={() => handleCardClick(`text-${textComponent.id}`)} />
+            <TextCard
+              key={textComponent.id}
+              textComponent={textComponent} // Pass the component object
+              onClick={() => handleCardClick(`text-${textComponent.id}`)}
+            />
           ))}
 
           <AddComponentButton />
