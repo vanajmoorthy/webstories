@@ -1,34 +1,32 @@
 import { useWebstoryStore } from "@/stores/webstoryStore"
-import { useState } from "react"
+import type { TextComponent } from "@/types/webstory"
 
-export function EditableText({ id, content }: { id: string; content: string }) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [localContent, setLocalContent] = useState(content)
-  const updateComponent = useWebstoryStore((state) => state.updateComponent)
+export function EditableText({ id }: { id: string }) {
+  const components = useWebstoryStore((state) => state.components)
 
-  const handleSave = () => {
-    updateComponent(id, { content: localContent })
-    setIsEditing(false)
+  // Get the current component data
+  const textComponent = components.find((c) => c.id === id) as TextComponent | undefined
+
+  if (!textComponent) return null
+
+  // Text styling
+  const textStyle = {
+    fontFamily: textComponent.fontFamily,
+    fontSize: textComponent.fontSize,
+    fontWeight: textComponent.bold ? "bold" : "normal",
+    fontStyle: textComponent.italic ? "italic" : "normal",
+    textDecoration: textComponent.underline ? "underline" : "none",
   }
 
   return (
-    <div className="p-4">
-      {isEditing ? (
-        <div className="flex flex-col">
-          <textarea
-            value={localContent}
-            onChange={(e) => setLocalContent(e.target.value)}
-            className="border border-gray-300 p-2"
-          />
-          <button onClick={handleSave} className="mt-2">
-            Save
-          </button>
-        </div>
-      ) : (
-        <div onClick={() => setIsEditing(true)} className="cursor-pointer">
-          <p>{content}</p>
-        </div>
-      )}
+    <div
+      className="p-4"
+      style={{
+        backgroundColor: textComponent.backgroundColor === "#" ? "transparent" : textComponent.backgroundColor,
+        textAlign: textComponent.alignment || "left",
+      }}
+    >
+      <div style={textStyle}>{textComponent.content}</div>
     </div>
   )
 }

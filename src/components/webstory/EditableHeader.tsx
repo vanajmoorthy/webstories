@@ -1,6 +1,5 @@
 import { useWebstoryStore } from "@/stores/webstoryStore"
 import { HeaderComponent } from "@/types/webstory"
-import { useState } from "react"
 
 export function EditableHeader({
   id,
@@ -17,54 +16,34 @@ export function EditableHeader({
   titleStyle: HeaderComponent["titleStyle"]
   subtitleStyle: HeaderComponent["subtitleStyle"]
 }) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [localHeading, setLocalHeading] = useState(heading)
-  const [localSubheading, setLocalSubheading] = useState(subheading)
-  const [localBackgroundColor, setLocalBackgroundColor] = useState(backgroundColor)
-  const updateComponent = useWebstoryStore((state) => state.updateComponent)
-
-  const handleSave = () => {
-    updateComponent(id, {
-      title: localHeading,
-      subtitle: localSubheading,
-      backgroundColor: localBackgroundColor,
-    })
-    setIsEditing(false)
-  }
-
   return (
     <div style={{ backgroundColor }} className="p-4 rounded-t-xl">
-      {isEditing ? (
-        <div className="flex flex-col">
-          <input value={localHeading} onChange={(e) => setLocalHeading(e.target.value)} />
-          <input value={localSubheading} onChange={(e) => setLocalSubheading(e.target.value)} />
-          <input type="color" value={localBackgroundColor} onChange={(e) => setLocalBackgroundColor(e.target.value)} />
-          <button onClick={handleSave}>Save</button>
-        </div>
-      ) : (
-        <div onClick={() => setIsEditing(true)}>
-          <h1
-            style={{
-              fontSize: titleStyle.fontSize,
-              fontFamily: titleStyle.fontFamily,
-              color: titleStyle.color,
-              textAlign: titleStyle.textAlign,
-            }}
-          >
-            {heading}
-          </h1>
-          <h2
-            style={{
-              fontSize: subtitleStyle.fontSize,
-              fontFamily: subtitleStyle.fontFamily,
-              color: subtitleStyle.color,
-              textAlign: subtitleStyle.textAlign,
-            }}
-          >
-            {subheading}
-          </h2>
-        </div>
-      )}
+      <h1
+        style={{
+          fontSize: titleStyle.fontSize,
+          fontFamily: titleStyle.fontFamily,
+          color: titleStyle.color,
+          textAlign: titleStyle.textAlign,
+          fontWeight: titleStyle.bold ? "bold" : "normal",
+          fontStyle: titleStyle.italic ? "italic" : "normal",
+          textDecoration: titleStyle.underline ? "underline" : "none",
+        }}
+      >
+        {heading}
+      </h1>
+      <h2
+        style={{
+          fontSize: subtitleStyle.fontSize,
+          fontFamily: subtitleStyle.fontFamily,
+          color: subtitleStyle.color,
+          textAlign: subtitleStyle.textAlign,
+          fontWeight: subtitleStyle.bold ? "bold" : "normal",
+          fontStyle: subtitleStyle.italic ? "italic" : "normal",
+          textDecoration: subtitleStyle.underline ? "underline" : "none",
+        }}
+      >
+        {subheading}
+      </h2>
     </div>
   )
 }

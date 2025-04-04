@@ -14,6 +14,9 @@ export type TextComponent = BaseComponent & {
   fontFamily: string
   italic: boolean
   bold: boolean
+  underline: boolean
+  alignment: "left" | "center" | "right"
+  backgroundColor: string
 }
 
 export type TimelineComponent = BaseComponent & {
@@ -46,11 +49,17 @@ export type HeaderComponent = BaseComponent & {
     fontFamily: string
     color: string
     textAlign: "left" | "right" | "center"
+    bold: boolean
+    italic: boolean
+    underline: boolean
   }
   subtitleStyle: {
     fontSize: string
     fontFamily: string
     color: string
     textAlign: "left" | "right" | "center"
+    bold: boolean
+    italic: boolean
+    underline: boolean
   }
 }

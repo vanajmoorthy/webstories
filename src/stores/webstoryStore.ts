@@ -16,9 +16,18 @@ export const useWebstoryStore = create<WebstoryState>((set) => ({
   addComponent: (component: WebstoryComponent) =>
     set((state) => {
       if (component.type === "header") {
-        const existingHeader = state.components.find((comp) => comp.type === "header")
-        if (existingHeader) return { components: state.components }
+        const existingHeaderIndex = state.components.findIndex((comp) => comp.type === "header")
+
+        if (existingHeaderIndex > -1) {
+          const newComponents = [...state.components]
+          newComponents[existingHeaderIndex] = component
+          return { components: newComponents }
+        }
+
+        return { components: [component, ...state.components] }
       }
+
+      // Append at the end
       return { components: [...state.components, component] }
     }),
 
@@ -53,8 +62,18 @@ export const useWebstoryStore = create<WebstoryState>((set) => ({
           order: 1,
           title: "Default Header",
           subtitle: "Subtitle",
-          titleStyle: { fontSize: "20px", fontFamily: "Arial", color: "black", textAlign: "center" },
-          subtitleStyle: { fontSize: "16px", fontFamily: "Arial", color: "gray", textAlign: "center" },
+          titleStyle: {
+            fontSize: "24px",
+            fontFamily: "Arial",
+            color: "#000000",
+            textAlign: "center",
+          },
+          subtitleStyle: {
+            fontSize: "16px",
+            fontFamily: "Arial",
+            color: "#666666",
+            textAlign: "center",
+          },
         } as HeaderComponent,
       ],
     }),
