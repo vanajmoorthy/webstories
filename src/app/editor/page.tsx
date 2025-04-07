@@ -123,6 +123,7 @@ export default function Editor() {
         onPageBackgroundColorChange={setPageBackgroundColor}
         onWebstoryTitleChange={setWebstoryTitle}
         onSave={saveWebstory}
+        webstoryId={id}
       />
 
       <SidebarInset>

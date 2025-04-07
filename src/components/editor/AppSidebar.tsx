@@ -11,8 +11,7 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { useWebstoryStore } from "@/stores/webstoryStore"
 import type { HeaderComponent, TextComponent } from "@/types/webstory"
-import { Home, Save, Send, Settings } from "lucide-react"
-// Removed ArrowLeft
+import { Home, Image, Save, Send, Settings } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
@@ -20,6 +19,7 @@ import { ComponentModal } from "./ComponentModal"
 import { ConfigPanel } from "./ConfigPanel"
 import { HeaderCard } from "./Header/HeaderCard"
 import { HeaderConfig } from "./Header/HeaderConfig"
+import { PhotoUploadModal } from "./PhotoUploader/PhotoUploadModal"
 import { SidebarContent } from "./SidebarContent"
 import { TextCard } from "./Text/TextCard"
 import { TextConfig } from "./Text/TextConfig"
@@ -40,6 +40,7 @@ const AddComponentButton = () => {
 interface AppSidebarProps {
   pageBackgroundColor?: string
   webstoryTitle?: string
+  webstoryId?: string
   onPageBackgroundColorChange?: (color: string) => void
   onWebstoryTitleChange?: (title: string) => void
   onSave?: () => Promise<void>
@@ -49,6 +50,7 @@ interface AppSidebarProps {
 export function AppSidebar({
   pageBackgroundColor = "#ffffff",
   webstoryTitle = "Untitled Webstory",
+  webstoryId = "",
   onPageBackgroundColorChange,
   onWebstoryTitleChange,
   onSave,
@@ -59,6 +61,7 @@ export function AppSidebar({
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false) // State for photo modal
   const { toast } = useToast()
   const navigate = useNavigate()
 
@@ -124,6 +127,10 @@ export function AppSidebar({
 
   const openSettingsModal = () => {
     setIsSettingsModalOpen(true)
+  }
+
+  const openPhotoModal = () => {
+    setIsPhotoModalOpen(true) // Handler to open photo modal
   }
 
   const handleNavigateHome = () => {
@@ -195,29 +202,26 @@ export function AppSidebar({
         </ConfigPanel>
       </div>
 
-      {/* Modified Footer with expanding Save/Publish */}
+      {/* Modified Footer with Home, Save, Publish, Photos */}
       <SidebarFooter className="flex items-center gap-2 p-2">
-        {" "}
-        {/* Removed justify-between */}
         {/* Home Button (Left, fixed size) */}
         <Button
           variant="outline"
           size="icon"
           onClick={handleNavigateHome}
           aria-label="Back to Home"
-          className="flex-shrink-0" // Prevent shrinking
+          className="flex-shrink-0"
         >
           <Home className="size-5" />
         </Button>
-        {/* Save and Publish Buttons Container (Takes remaining space) */}
-        {/* Added flex-grow to this div */}
+
+        {/* Save and Publish Buttons Container (Takes most space) */}
         <div className="flex items-center gap-2 flex-grow">
           <Button
             variant="outline"
-            size="icon"
+            size="sm" // Changed back to sm to fit text better
             onClick={handleSave}
             disabled={!onSave || isSaving || isPublishing}
-            // Added flex-grow and justify-center
             className="flex flex-grow items-center justify-center gap-1.5"
           >
             {isSaving ? (
@@ -233,10 +237,9 @@ export function AppSidebar({
             )}
           </Button>
           <Button
-            size="icon"
+            size="sm" // Changed back to sm to fit text better
             onClick={handlePublish}
             disabled={!onPublish || isSaving || isPublishing}
-            // Added flex-grow and justify-center
             className="flex flex-grow items-center justify-center gap-1.5"
           >
             {isPublishing ? (
@@ -252,6 +255,18 @@ export function AppSidebar({
             )}
           </Button>
         </div>
+
+        {/* Photo Upload Button (Right, fixed size) */}
+        <Button
+          variant="outline" // Using outline to match Home button
+          size="icon"
+          onClick={openPhotoModal} // Open photo modal on click
+          aria-label="Open Photo Gallery"
+          className="flex-shrink-0"
+          disabled={isSaving || isPublishing} // Optional: disable while saving/publishing
+        >
+          <Image className="size-5" />
+        </Button>
       </SidebarFooter>
 
       <WebstorySettingsModal
@@ -262,6 +277,21 @@ export function AppSidebar({
         onTitleChange={onWebstoryTitleChange}
         onBackgroundColorChange={onPageBackgroundColorChange}
       />
+
+      {isPhotoModalOpen && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-lg font-semibold mb-4">Photo Upload Modal</h2>
+              <p>Modal content goes here...</p>
+              <Button variant="outline" className="mt-4" onClick={() => setIsPhotoModalOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+          <PhotoUploadModal open={isPhotoModalOpen} webstoryId={webstoryId} onOpenChange={setIsPhotoModalOpen} />
+        </>
+      )}
     </Sidebar>
   )
 }

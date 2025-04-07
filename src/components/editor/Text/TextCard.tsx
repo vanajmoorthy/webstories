@@ -17,6 +17,12 @@ export function TextCard({ textComponent, onClick }: TextCardProps) {
 
   const textColorClass = getTextColorClass(bgColor)
 
+  let content = textComponent?.content
+
+  if ((content.length || 0) > 40) {
+    content = content?.slice(0, 40) + "..."
+  }
+
   return (
     <Card className="mt-2 cursor-pointer hover:shadow-md transition-shadow" onClick={onClick}>
       <CardContent className="p-3 flex items-center gap-3">
@@ -25,7 +31,7 @@ export function TextCard({ textComponent, onClick }: TextCardProps) {
         </div>
         <div className="flex-1 overflow-hidden">
           <p className="font-medium text-sm truncate">Text Block</p>
-          <p className="text-xs text-muted-foreground truncate">{textComponent?.content || "Click to edit text"}</p>
+          <p className="text-xs text-muted-foreground truncate">{content || "Click to edit text"}</p>
         </div>
       </CardContent>
     </Card>

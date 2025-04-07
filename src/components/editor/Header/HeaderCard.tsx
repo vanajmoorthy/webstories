@@ -14,6 +14,18 @@ export function HeaderCard({ onClick }: HeaderCardProps) {
 
   const textColorClass = getTextColorClass(bgColor)
 
+  let title = headerComponent?.title
+
+  let subtitle = headerComponent?.subtitle
+
+  if ((title?.length || 0) > 15) {
+    title = title?.slice(0, 15) + "..."
+  }
+
+  if ((subtitle?.length || 0) > 10) {
+    subtitle = subtitle?.slice(0, 10) + "..."
+  }
+
   return (
     <Card className="mt-2 cursor-pointer hover:shadow-md transition-shadow" onClick={onClick}>
       <CardContent className="p-3 flex items-center gap-3">
@@ -23,7 +35,7 @@ export function HeaderCard({ onClick }: HeaderCardProps) {
         <div className="flex-1">
           <p className="font-medium">Header</p>
           <p className="text-xs text-muted-foreground truncate">
-            {headerComponent?.title || "Title"} / {headerComponent?.subtitle || "Subtitle"}
+            {title || "Title"} / {subtitle || "Subtitle"}
           </p>
         </div>
       </CardContent>
