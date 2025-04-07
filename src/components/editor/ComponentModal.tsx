@@ -26,7 +26,7 @@ export const ComponentModal = ({ closeModal }: ComponentModalProps) => {
       type: "text",
       content: "This is a new text component",
       order: components.length + 1,
-      backgroundColor: "#ffffff",
+      backgroundColor: "none",
       fontSize: "16px",
       fontFamily: "Arial",
       italic: false,

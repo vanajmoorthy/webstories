@@ -14,29 +14,26 @@ export function HeaderCard({ onClick }: HeaderCardProps) {
 
   const textColorClass = getTextColorClass(bgColor)
 
-  let title = headerComponent?.title
+  const title = headerComponent?.title || "Title"
+  const subtitle = headerComponent?.subtitle || "Subtitle"
 
-  let subtitle = headerComponent?.subtitle
-
-  if ((title?.length || 0) > 15) {
-    title = title?.slice(0, 15) + "..."
-  }
-
-  if ((subtitle?.length || 0) > 10) {
-    subtitle = subtitle?.slice(0, 10) + "..."
+  let combinedText = `${title} / ${subtitle}`
+  if (combinedText.length > 37) {
+    combinedText = combinedText.slice(0, 37) + "..."
   }
 
   return (
     <Card className="mt-2 cursor-pointer hover:shadow-md transition-shadow" onClick={onClick}>
       <CardContent className="p-3 flex items-center gap-3">
-        <div className="flex items-center justify-center h-8 w-8 rounded-md" style={{ backgroundColor: bgColor }}>
+        <div
+          className="flex items-center justify-center h-8 w-8 rounded-md border border-gray-400"
+          style={{ backgroundColor: bgColor }}
+        >
           <Type className={`h-4 w-4 ${textColorClass}`} />
         </div>
         <div className="flex-1">
-          <p className="font-medium">Header</p>
-          <p className="text-xs text-muted-foreground truncate">
-            {title || "Title"} / {subtitle || "Subtitle"}
-          </p>
+          <p className="font-medium text-sm truncate">Header</p>
+          <p className="text-xs text-muted-foreground truncate">{combinedText}</p>
         </div>
       </CardContent>
     </Card>

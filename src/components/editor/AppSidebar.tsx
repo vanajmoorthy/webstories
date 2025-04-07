@@ -9,11 +9,30 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { useToast } from "@/hooks/use-toast"
+import { getTextColorClass } from "@/lib/color"
 import { useWebstoryStore } from "@/stores/webstoryStore"
 import type { HeaderComponent, PhotoTimelineComponent, TextComponent } from "@/types/webstory"
+import {
+  DndContext,
+  DragEndEvent,
+  DraggableAttributes,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core"
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import { Home, Image, Save, Send, Settings } from "lucide-react"
 import { PlusCircle } from "lucide-react"
-import { useState } from "react"
+import React, { CSSProperties, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import { ComponentModal } from "./ComponentModal"
@@ -27,6 +46,48 @@ import { SidebarContent } from "./SidebarContent"
 import { TextCard } from "./Text/TextCard"
 import { TextConfig } from "./Text/TextConfig"
 import { WebstorySettingsModal } from "./WebstorySettingsModal"
+
+interface SortableInjectedProps {
+  attributes?: DraggableAttributes
+  listeners?: any
+  isDragging?: boolean
+}
+
+interface SortableItemProps {
+  id: string
+  children: React.ReactElement
+}
+
+function SortableItem({ id, children }: SortableItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
+
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  if (!React.isValidElement<SortableInjectedProps>(children)) {
+    return (
+      <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        Invalid Child
+      </div>
+    )
+  }
+
+  const injectedProps: SortableInjectedProps = {
+    attributes: attributes,
+    listeners: listeners,
+    isDragging: isDragging,
+  }
+
+  const childWithProps = React.cloneElement<SortableInjectedProps>(children, injectedProps)
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {childWithProps}
+    </div>
+  )
+}
 
 const AddComponentButton = () => {
   const [isModalOpen, setModalOpen] = useState(false)
@@ -71,15 +132,61 @@ export function AppSidebar({
   const navigate = useNavigate()
 
   const components = useWebstoryStore((state) => state.components)
-  const headerComponent = components.find((component) => component.type === "header") as HeaderComponent | undefined
-  const textComponents = components.filter((component) => component.type === "text") as TextComponent[]
-  const timelineComponents = components.filter(
-    (component) => component.type === "photoTimeline"
-  ) as PhotoTimelineComponent[]
+  const setComponents = useWebstoryStore((state) => state.setComponents)
 
-  const handleCardClick = (configType: string) => {
-    setActiveConfig(configType)
+  const headerComponent = useMemo(() => components.find((c) => c.type === "header"), [components])
+
+  const textColorClass = getTextColorClass(pageBackgroundColor)
+
+  const sortableItems = useMemo(
+    () => components.filter((c) => c.type !== "header").sort((a, b) => a.order - b.order),
+    [components]
+  )
+
+  const renderableSortableItems = useMemo(
+    () => sortableItems.filter((comp) => comp.type === "text" || comp.type === "photoTimeline"),
+    [sortableItems]
+  )
+
+  const renderableSortableItemIds = useMemo(
+    () => renderableSortableItems.map((item) => item.id),
+    [renderableSortableItems]
+  )
+
+  const handleCardClick = (configId: string) => {
+    setActiveConfig(configId)
     setShowConfigPanel(true)
+  }
+
+  const handleBackFromConfig = () => {
+    setShowConfigPanel(false)
+    setActiveConfig(null)
+  }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 10 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id) {
+      const oldIndex = sortableItems.findIndex((item) => item.id === active.id)
+      const newIndex = sortableItems.findIndex((item) => item.id === over.id)
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const reorderedSortableItems = arrayMove(sortableItems, oldIndex, newIndex)
+
+        const finalComponents = [...(headerComponent ? [headerComponent] : []), ...reorderedSortableItems].map(
+          (component, index) => ({
+            ...component,
+            order: index,
+          })
+        )
+        setComponents(finalComponents)
+      }
+    }
   }
 
   const handleSave = async () => {
@@ -136,13 +243,36 @@ export function AppSidebar({
   const openSettingsModal = () => {
     setIsSettingsModalOpen(true)
   }
-
   const openPhotoModal = () => {
     setIsPhotoModalOpen(true)
   }
-
   const handleNavigateHome = () => {
     navigate("/")
+  }
+
+  const renderActiveConfig = () => {
+    if (!activeConfig) return null
+    const activeComponent = components.find((comp) =>
+      activeConfig === "header" ? comp.type === "header" : activeConfig === `${comp.type}-${comp.id}`
+    )
+    if (!activeComponent) return null
+
+    switch (activeComponent.type) {
+      case "header":
+        return <HeaderConfig headerComponent={activeComponent as HeaderComponent} onBack={handleBackFromConfig} />
+      case "text":
+        return <TextConfig textComponent={activeComponent as TextComponent} onBack={handleBackFromConfig} />
+      case "photoTimeline":
+        return (
+          <PhotoTimelineConfig
+            photoTimelineComponent={activeComponent as PhotoTimelineComponent}
+            onBack={handleBackFromConfig}
+            webstoryId={webstoryId}
+          />
+        )
+      default:
+        return null
+    }
   }
 
   return (
@@ -152,7 +282,7 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" onClick={openSettingsModal} aria-label="Open webstory settings">
               <div
-                className="flex aspect-square size-8 flex-shrink-0 items-center justify-center rounded-lg text-white"
+                className={`flex aspect-square size-8 flex-shrink-0 items-center justify-center rounded-lg  border border-gray-400  ${textColorClass}`}
                 style={{ backgroundColor: pageBackgroundColor }}
               >
                 {webstoryTitle.charAt(0).toUpperCase()}
@@ -170,69 +300,34 @@ export function AppSidebar({
 
       <div className="relative flex-1 overflow-y-auto">
         <SidebarContent hidden={showConfigPanel}>
-          {headerComponent && (
-            <HeaderCard
-              onClick={() => {
-                handleCardClick("header")
-              }}
-            />
-          )}
-          {textComponents.map((textComponent) => (
-            <TextCard
-              key={textComponent.id}
-              textComponent={textComponent}
-              onClick={() => handleCardClick(`text-${textComponent.id}`)}
-            />
-          ))}
-          {timelineComponents.map((timelineComponent) => (
-            <PhotoTimelineCard
-              key={timelineComponent.id}
-              photoTimelineComponent={timelineComponent}
-              onClick={() => handleCardClick(`timeline-${timelineComponent.id}`)}
-            />
-          ))}
+          {headerComponent && <HeaderCard key={headerComponent.id} onClick={() => handleCardClick("header")} />}
+
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={renderableSortableItemIds} strategy={verticalListSortingStrategy}>
+              {renderableSortableItems.map((component) => (
+                <SortableItem key={component.id} id={component.id}>
+                  {component.type === "text" ? (
+                    <TextCard
+                      textComponent={component as TextComponent}
+                      onClick={() => handleCardClick(`text-${component.id}`)}
+                    />
+                  ) : (
+                    <PhotoTimelineCard
+                      photoTimelineComponent={component as PhotoTimelineComponent}
+                      onClick={() => handleCardClick(`photoTimeline-${component.id}`)}
+                    />
+                  )}
+                </SortableItem>
+              ))}
+            </SortableContext>
+          </DndContext>
+
           <AddComponentButton />
         </SidebarContent>
-        <ConfigPanel show={showConfigPanel}>
-          {activeConfig === "header" && headerComponent && (
-            <HeaderConfig
-              headerComponent={headerComponent}
-              onBack={() => {
-                setShowConfigPanel(false)
-              }}
-            />
-          )}
-          {textComponents.map(
-            (textComponent) =>
-              activeConfig === `text-${textComponent.id}` && (
-                <TextConfig
-                  key={textComponent.id}
-                  textComponent={textComponent}
-                  onBack={() => {
-                    setShowConfigPanel(false)
-                  }}
-                />
-              )
-          )}
-          {timelineComponents.map(
-            (timelineComponent) =>
-              activeConfig === `timeline-${timelineComponent.id}` && (
-                <PhotoTimelineConfig
-                  key={timelineComponent.id}
-                  photoTimelineComponent={timelineComponent}
-                  onBack={() => {
-                    setShowConfigPanel(false)
-                  }}
-                  webstoryId={webstoryId}
-                />
-              )
-          )}
-        </ConfigPanel>
+        <ConfigPanel show={showConfigPanel}>{renderActiveConfig()}</ConfigPanel>
       </div>
 
-      {/* Modified Footer with Home, Save, Publish, Photos */}
       <SidebarFooter className="flex items-center gap-2 p-2">
-        {/* Home Button (Left, fixed size) */}
         <Button
           variant="outline"
           size="icon"
@@ -242,8 +337,6 @@ export function AppSidebar({
         >
           <Home className="size-5" />
         </Button>
-
-        {/* Save and Publish Buttons Container (Takes most space) */}
         <div className="flex items-center gap-2 flex-grow">
           <Button
             variant="outline"
@@ -283,8 +376,6 @@ export function AppSidebar({
             )}
           </Button>
         </div>
-
-        {/* Photo Upload Button (Right, fixed size) */}
         <Button
           variant="outline"
           size="icon"
@@ -305,7 +396,6 @@ export function AppSidebar({
         onTitleChange={onWebstoryTitleChange}
         onBackgroundColorChange={onPageBackgroundColorChange}
       />
-
       {isPhotoModalOpen && (
         <PhotoUploadModal open={isPhotoModalOpen} onOpenChange={setIsPhotoModalOpen} webstoryId={webstoryId} />
       )}

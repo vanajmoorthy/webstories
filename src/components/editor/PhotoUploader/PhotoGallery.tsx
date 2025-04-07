@@ -93,12 +93,13 @@ export function PhotoGallery({ onSelect, selectable = true }: PhotoGalleryProps)
 
   return (
     <div className="flex-1 flex flex-col p-4">
-      <ScrollArea className="flex-1">
+      <ScrollArea className="h-[500px]">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {photos.map((photo) => (
             <div
               key={photo.id}
-              className={`group relative aspect-square rounded-md overflow-hidden border ${selectable ? "cursor-pointer" : ""}`}
+              className={`group relative aspect-square rounded-md overflow-hidden border ${selectable ? "cursor-pointer" : ""
+                }`}
               onClick={selectable && onSelect ? () => onSelect(photo) : undefined}
             >
               <img src={photo.url || "/placeholder.svg"} alt={photo.filename} className="w-full h-full object-cover" />

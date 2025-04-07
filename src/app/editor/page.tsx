@@ -6,7 +6,8 @@ import { EditableText } from "@/components/webstory/EditableText"
 import { useToast } from "@/hooks/use-toast"
 import pb from "@/lib/pocketbase"
 import { useWebstoryStore } from "@/stores/webstoryStore"
-import { useEffect, useState } from "react"
+import type { WebstoryComponent } from "@/types/webstory"
+import { useEffect, useMemo, useState } from "react"
 import { useParams } from "react-router-dom"
 
 export default function Editor() {
@@ -33,30 +34,44 @@ export default function Editor() {
         console.log("Loaded webstory:", webstory)
 
         setWebstoryTitle(webstory.title || "Untitled Webstory")
-
         setPageBackgroundColor(webstory.pageBackgroundColor || "#ffffff")
 
+        let loadedComponents: WebstoryComponent[] = []
         if (typeof webstory.content === "string") {
-          setComponents(JSON.parse(webstory.content))
-        } else {
-          setComponents(webstory.content)
-        }
+          try {
+            loadedComponents = JSON.parse(webstory.content) as WebstoryComponent[]
 
-        setIsLoading(false)
+            if (!Array.isArray(loadedComponents)) {
+              console.error("Parsed content is not an array:", loadedComponents)
+              loadedComponents = []
+            }
+          } catch (e) {
+            console.error("Failed to parse webstory content:", e)
+            loadedComponents = []
+          }
+        } else if (Array.isArray(webstory.content)) {
+          loadedComponents = webstory.content as WebstoryComponent[]
+        }
+        setComponents(loadedComponents.sort((a: WebstoryComponent, b: WebstoryComponent) => a.order - b.order))
       } catch (error) {
         console.error("Failed to load webstory", error)
-        setIsLoading(false)
-
         toast({
           variant: "destructive",
           title: "Error Loading Webstory",
           description: "Failed to load webstory. Please try again.",
         })
+      } finally {
+        setIsLoading(false)
       }
     }
 
     loadWebstory()
   }, [id, setComponents, toast])
+
+  const sortedEditorComponents = useMemo(
+    () => [...components].sort((a: WebstoryComponent, b: WebstoryComponent) => a.order - b.order),
+    [components]
+  )
 
   const saveWebstory = async () => {
     try {
@@ -81,10 +96,12 @@ export default function Editor() {
         return
       }
 
+      const sortedComponentsForSave = [...components].sort((a, b) => a.order - b.order)
+
       await pb.collection("webstories").update(id, {
         user: user.id,
         title: webstoryTitle,
-        content: JSON.stringify(components),
+        content: JSON.stringify(sortedComponentsForSave),
         pageBackgroundColor: pageBackgroundColor,
       })
 
@@ -100,6 +117,8 @@ export default function Editor() {
         title: "Save Failed",
         description: "Failed to save webstory. Please try again.",
       })
+
+      throw error
     }
   }
 
@@ -126,17 +145,19 @@ export default function Editor() {
         <SidebarTrigger className="absolute left-4 top-4 z-20" />
 
         <main className="z-10 h-full overflow-auto rounded-xl" style={{ backgroundColor: pageBackgroundColor }}>
-          {components.map((component) => {
-            if (component.type === "header") {
-              return <EditableHeader key={component.id} id={component.id} />
+          {sortedEditorComponents.map((component) => {
+            switch (component.type) {
+              case "header":
+                return <EditableHeader key={component.id} id={component.id} />
+              case "text":
+                return <EditableText key={component.id} id={component.id} />
+              case "photoTimeline":
+                return <EditablePhotoTimeline key={component.id} id={component.id} />
+              default:
+                const exhaustiveCheck: never = component
+                console.warn("Unhandled component type in editor:", exhaustiveCheck)
+                return null
             }
-            if (component.type === "text") {
-              return <EditableText key={component.id} id={component.id} />
-            }
-            if (component.type === "photoTimeline") {
-              return <EditablePhotoTimeline key={component.id} id={component.id} />
-            }
-            return null
           })}
         </main>
       </SidebarInset>
