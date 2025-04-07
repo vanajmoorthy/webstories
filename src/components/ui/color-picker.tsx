@@ -298,7 +298,7 @@ export function ColorPicker({
         <Button
           variant="outline"
           className={cn(
-            "h-8 w-8 p-0 flex items-center justify-center border-2",
+            "h-8 w-8 p-0 flex items-center justify-center border-2 ",
             disabled && "opacity-50 cursor-not-allowed",
             triggerClassName
           )}
@@ -306,7 +306,7 @@ export function ColorPicker({
           style={{ backgroundColor: triggerDisplayColor }} // Use derived hex or white for background
         >
           {/* Show diagonal line if actual value is no color */}
-          {hexColor === "" && <div className="w-full h-0.5 bg-red-500 rotate-45 absolute" />}
+          {hexColor === "" && <div className="w-9 h-0.5 bg-red-500 rotate-45 absolute" />}
           <span className="sr-only">Pick a color</span>
         </Button>
       </PopoverTrigger>
@@ -344,7 +344,7 @@ export function ColorPicker({
             >
               {hexColor === "" && (
                 <div className="w-full h-full flex items-center justify-center relative">
-                  <div className="w-full h-0.5 bg-red-500 rotate-45 absolute" />
+                  <div className="w-9 h-0.5 bg-red-500 rotate-45 absolute" />
                 </div>
               )}
             </div>
@@ -380,7 +380,6 @@ export function ColorPicker({
 
           {/* Presets */}
           <div className="grid grid-cols-6 gap-1 pt-1">
-            {" "}
             {/* Adjusted grid cols */}
             <Button
               variant="outline"

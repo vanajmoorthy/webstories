@@ -11,8 +11,10 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { useWebstoryStore } from "@/stores/webstoryStore"
 import type { HeaderComponent, TextComponent } from "@/types/webstory"
-import { Save } from "lucide-react"
+import { Home, Save, Send, Settings } from "lucide-react"
+// Removed ArrowLeft
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 import { ComponentModal } from "./ComponentModal"
 import { ConfigPanel } from "./ConfigPanel"
@@ -27,7 +29,7 @@ const AddComponentButton = () => {
   const [isModalOpen, setModalOpen] = useState(false)
   return (
     <div className="mt-4">
-      <Button onClick={() => setModalOpen(true)} className="w-full">
+      <Button variant="default" onClick={() => setModalOpen(true)} className="w-full">
         Add Component
       </Button>
       {isModalOpen && <ComponentModal closeModal={() => setModalOpen(false)} />}
@@ -41,6 +43,7 @@ interface AppSidebarProps {
   onPageBackgroundColorChange?: (color: string) => void
   onWebstoryTitleChange?: (title: string) => void
   onSave?: () => Promise<void>
+  onPublish?: () => Promise<void>
 }
 
 export function AppSidebar({
@@ -49,12 +52,15 @@ export function AppSidebar({
   onPageBackgroundColorChange,
   onWebstoryTitleChange,
   onSave,
+  onPublish,
 }: AppSidebarProps) {
   const [activeConfig, setActiveConfig] = useState<string | null>(null)
   const [showConfigPanel, setShowConfigPanel] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const { toast } = useToast() // Use the toast hook
+  const [isPublishing, setIsPublishing] = useState(false)
+  const { toast } = useToast()
+  const navigate = useNavigate()
 
   const components = useWebstoryStore((state) => state.components)
   const headerComponent = components.find((component) => component.type === "header") as HeaderComponent | undefined
@@ -67,21 +73,52 @@ export function AppSidebar({
 
   const handleSave = async () => {
     if (onSave) {
+      setIsSaving(true)
       try {
-        setIsSaving(true)
         await onSave()
-        setIsSaving(false)
+        toast({
+          title: "Saved Successfully",
+          description: "Your webstory draft has been saved.",
+        })
       } catch (error) {
         console.error("Error saving webstory:", error)
-        setIsSaving(false)
-
-        // Show error toast
         toast({
           variant: "destructive",
           title: "Save Failed",
-          description: "Failed to save webstory. Please try again.",
+          description: "Failed to save webstory draft. Please try again.",
         })
+      } finally {
+        setIsSaving(false)
       }
+    }
+  }
+
+  const handlePublish = async () => {
+    if (onPublish) {
+      setIsPublishing(true)
+      try {
+        await onPublish()
+        toast({
+          title: "Published Successfully",
+          description: "Your webstory has been published.",
+        })
+      } catch (error) {
+        console.error("Error publishing webstory:", error)
+        toast({
+          variant: "destructive",
+          title: "Publish Failed",
+          description: "Failed to publish webstory. Please try again.",
+        })
+      } finally {
+        setIsPublishing(false)
+      }
+    } else {
+      console.warn("Publish action not implemented.")
+      toast({
+        variant: "default",
+        title: "Publish Not Available",
+        description: "The publish functionality is not configured.",
+      })
     }
   }
 
@@ -89,29 +126,34 @@ export function AppSidebar({
     setIsSettingsModalOpen(true)
   }
 
+  const handleNavigateHome = () => {
+    navigate("/")
+  }
+
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" onClick={openSettingsModal}>
+            <SidebarMenuButton size="lg" onClick={openSettingsModal} aria-label="Open webstory settings">
               <div
-                className="flex aspect-square size-8 items-center justify-center rounded-lg text-white"
+                className="flex aspect-square size-8 flex-shrink-0 items-center justify-center rounded-lg text-white"
                 style={{ backgroundColor: pageBackgroundColor }}
               >
                 {webstoryTitle.charAt(0).toUpperCase()}
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-sm leading-tight ml-2 min-w-0">
                 <span className="truncate font-semibold">{webstoryTitle}</span>
                 <span className="truncate text-xs text-muted-foreground">Click to edit</span>
               </div>
+              <Settings className="ml-2 size-4 flex-shrink-0 text-muted-foreground" />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarSeparator />
 
-      <div className="relative flex-1">
+      <div className="relative flex-1 overflow-y-auto">
         <SidebarContent hidden={showConfigPanel}>
           {headerComponent && (
             <HeaderCard
@@ -120,15 +162,13 @@ export function AppSidebar({
               }}
             />
           )}
-
           {textComponents.map((textComponent) => (
             <TextCard
               key={textComponent.id}
-              textComponent={textComponent} // Pass the component object
+              textComponent={textComponent}
               onClick={() => handleCardClick(`text-${textComponent.id}`)}
             />
           ))}
-
           <AddComponentButton />
         </SidebarContent>
         <ConfigPanel show={showConfigPanel}>
@@ -155,28 +195,65 @@ export function AppSidebar({
         </ConfigPanel>
       </div>
 
-      {/* Save Button in Footer */}
-      <SidebarFooter>
+      {/* Modified Footer with expanding Save/Publish */}
+      <SidebarFooter className="flex items-center gap-2 p-2">
+        {" "}
+        {/* Removed justify-between */}
+        {/* Home Button (Left, fixed size) */}
         <Button
-          onClick={handleSave}
-          className="w-full flex items-center justify-center gap-2"
-          disabled={!onSave || isSaving}
+          variant="outline"
+          size="icon"
+          onClick={handleNavigateHome}
+          aria-label="Back to Home"
+          className="flex-shrink-0" // Prevent shrinking
         >
-          {isSaving ? (
-            <>
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4" />
-              Save Webstory
-            </>
-          )}
+          <Home className="size-5" />
         </Button>
+        {/* Save and Publish Buttons Container (Takes remaining space) */}
+        {/* Added flex-grow to this div */}
+        <div className="flex items-center gap-2 flex-grow">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleSave}
+            disabled={!onSave || isSaving || isPublishing}
+            // Added flex-grow and justify-center
+            className="flex flex-grow items-center justify-center gap-1.5"
+          >
+            {isSaving ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Save
+              </>
+            )}
+          </Button>
+          <Button
+            size="icon"
+            onClick={handlePublish}
+            disabled={!onPublish || isSaving || isPublishing}
+            // Added flex-grow and justify-center
+            className="flex flex-grow items-center justify-center gap-1.5"
+          >
+            {isPublishing ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Publishing...
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                Publish
+              </>
+            )}
+          </Button>
+        </div>
       </SidebarFooter>
 
-      {/* Webstory Settings Modal */}
       <WebstorySettingsModal
         open={isSettingsModalOpen}
         onOpenChange={setIsSettingsModalOpen}
