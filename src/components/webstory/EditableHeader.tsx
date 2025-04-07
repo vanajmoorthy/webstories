@@ -1,23 +1,39 @@
 import { useWebstoryStore } from "@/stores/webstoryStore"
 import { HeaderComponent } from "@/types/webstory"
+import React from "react"
 
-export function EditableHeader({
-  id,
-  heading,
-  subheading,
-  backgroundColor,
-  titleStyle,
-  subtitleStyle,
-}: {
+interface EditableHeaderProps {
   id: string
-  heading: string
-  subheading: string
-  backgroundColor: string
-  titleStyle: HeaderComponent["titleStyle"]
-  subtitleStyle: HeaderComponent["subtitleStyle"]
-}) {
+}
+
+export function EditableHeader({ id }: EditableHeaderProps) {
+  const components = useWebstoryStore((state) => state.components)
+  const headerComponent = components.find((c) => c.id === id && c.type === "header") as HeaderComponent | undefined
+
+  if (!headerComponent || headerComponent.type !== "header") {
+    console.warn(`Component with id ${id} not found or is not a HeaderComponent.`)
+    return null
+  }
+
+  const { title, subtitle, backgroundColor, titleStyle, subtitleStyle, height, verticalAlignment } = headerComponent
+
+  const verticalAlignMap: Record<HeaderComponent["verticalAlignment"], string> = {
+    top: "flex-start",
+    center: "center",
+    bottom: "flex-end",
+  }
+
+  const containerStyle: React.CSSProperties = {
+    backgroundColor: backgroundColor,
+    height: height || "auto",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: verticalAlignMap[verticalAlignment || "center"],
+    padding: "1rem",
+  }
+
   return (
-    <div style={{ backgroundColor }} className="p-4 rounded-t-xl">
+    <div style={containerStyle} className="rounded-t-xl">
       <h1
         style={{
           fontSize: titleStyle.fontSize,
@@ -27,9 +43,10 @@ export function EditableHeader({
           fontWeight: titleStyle.bold ? "bold" : "normal",
           fontStyle: titleStyle.italic ? "italic" : "normal",
           textDecoration: titleStyle.underline ? "underline" : "none",
+          marginBottom: "0.5rem",
         }}
       >
-        {heading}
+        {title}
       </h1>
       <h2
         style={{
@@ -42,7 +59,7 @@ export function EditableHeader({
           textDecoration: subtitleStyle.underline ? "underline" : "none",
         }}
       >
-        {subheading}
+        {subtitle}
       </h2>
     </div>
   )

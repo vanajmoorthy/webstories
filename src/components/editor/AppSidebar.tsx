@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/sidebar"
 import { useToast } from "@/hooks/use-toast"
 import { useWebstoryStore } from "@/stores/webstoryStore"
-import type { HeaderComponent, TextComponent } from "@/types/webstory"
+import type { HeaderComponent, PhotoTimelineComponent, TextComponent } from "@/types/webstory"
 import { Home, Image, Save, Send, Settings } from "lucide-react"
+import { PlusCircle } from "lucide-react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
@@ -19,6 +20,8 @@ import { ComponentModal } from "./ComponentModal"
 import { ConfigPanel } from "./ConfigPanel"
 import { HeaderCard } from "./Header/HeaderCard"
 import { HeaderConfig } from "./Header/HeaderConfig"
+import { PhotoTimelineCard } from "./PhotoTimeline/PhotoTimelineCard"
+import { PhotoTimelineConfig } from "./PhotoTimeline/PhotoTimelineConfig"
 import { PhotoUploadModal } from "./PhotoUploader/PhotoUploadModal"
 import { SidebarContent } from "./SidebarContent"
 import { TextCard } from "./Text/TextCard"
@@ -27,10 +30,12 @@ import { WebstorySettingsModal } from "./WebstorySettingsModal"
 
 const AddComponentButton = () => {
   const [isModalOpen, setModalOpen] = useState(false)
+
   return (
     <div className="mt-4">
-      <Button variant="default" onClick={() => setModalOpen(true)} className="w-full">
+      <Button variant="default" onClick={() => setModalOpen(true)} className="w-full flex items-center gap-2">
         Add Component
+        <PlusCircle strokeWidth={2.5} size={24} />
       </Button>
       {isModalOpen && <ComponentModal closeModal={() => setModalOpen(false)} />}
     </div>
@@ -61,13 +66,16 @@ export function AppSidebar({
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
-  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false) // State for photo modal
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false)
   const { toast } = useToast()
   const navigate = useNavigate()
 
   const components = useWebstoryStore((state) => state.components)
   const headerComponent = components.find((component) => component.type === "header") as HeaderComponent | undefined
   const textComponents = components.filter((component) => component.type === "text") as TextComponent[]
+  const timelineComponents = components.filter(
+    (component) => component.type === "photoTimeline"
+  ) as PhotoTimelineComponent[]
 
   const handleCardClick = (configType: string) => {
     setActiveConfig(configType)
@@ -130,7 +138,7 @@ export function AppSidebar({
   }
 
   const openPhotoModal = () => {
-    setIsPhotoModalOpen(true) // Handler to open photo modal
+    setIsPhotoModalOpen(true)
   }
 
   const handleNavigateHome = () => {
@@ -176,6 +184,13 @@ export function AppSidebar({
               onClick={() => handleCardClick(`text-${textComponent.id}`)}
             />
           ))}
+          {timelineComponents.map((timelineComponent) => (
+            <PhotoTimelineCard
+              key={timelineComponent.id}
+              photoTimelineComponent={timelineComponent}
+              onClick={() => handleCardClick(`timeline-${timelineComponent.id}`)}
+            />
+          ))}
           <AddComponentButton />
         </SidebarContent>
         <ConfigPanel show={showConfigPanel}>
@@ -199,6 +214,19 @@ export function AppSidebar({
                 />
               )
           )}
+          {timelineComponents.map(
+            (timelineComponent) =>
+              activeConfig === `timeline-${timelineComponent.id}` && (
+                <PhotoTimelineConfig
+                  key={timelineComponent.id}
+                  photoTimelineComponent={timelineComponent}
+                  onBack={() => {
+                    setShowConfigPanel(false)
+                  }}
+                  webstoryId={webstoryId}
+                />
+              )
+          )}
         </ConfigPanel>
       </div>
 
@@ -219,7 +247,7 @@ export function AppSidebar({
         <div className="flex items-center gap-2 flex-grow">
           <Button
             variant="outline"
-            size="sm" // Changed back to sm to fit text better
+            size="sm"
             onClick={handleSave}
             disabled={!onSave || isSaving || isPublishing}
             className="flex flex-grow items-center justify-center gap-1.5"
@@ -237,7 +265,7 @@ export function AppSidebar({
             )}
           </Button>
           <Button
-            size="sm" // Changed back to sm to fit text better
+            size="sm"
             onClick={handlePublish}
             disabled={!onPublish || isSaving || isPublishing}
             className="flex flex-grow items-center justify-center gap-1.5"
@@ -258,12 +286,12 @@ export function AppSidebar({
 
         {/* Photo Upload Button (Right, fixed size) */}
         <Button
-          variant="outline" // Using outline to match Home button
+          variant="outline"
           size="icon"
-          onClick={openPhotoModal} // Open photo modal on click
+          onClick={openPhotoModal}
           aria-label="Open Photo Gallery"
           className="flex-shrink-0"
-          disabled={isSaving || isPublishing} // Optional: disable while saving/publishing
+          disabled={isSaving || isPublishing}
         >
           <Image className="size-5" />
         </Button>
@@ -279,18 +307,7 @@ export function AppSidebar({
       />
 
       {isPhotoModalOpen && (
-        <>
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-lg font-semibold mb-4">Photo Upload Modal</h2>
-              <p>Modal content goes here...</p>
-              <Button variant="outline" className="mt-4" onClick={() => setIsPhotoModalOpen(false)}>
-                Close
-              </Button>
-            </div>
-          </div>
-          <PhotoUploadModal open={isPhotoModalOpen} webstoryId={webstoryId} onOpenChange={setIsPhotoModalOpen} />
-        </>
+        <PhotoUploadModal open={isPhotoModalOpen} onOpenChange={setIsPhotoModalOpen} webstoryId={webstoryId} />
       )}
     </Sidebar>
   )

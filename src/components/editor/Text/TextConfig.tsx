@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { parsePixelValue } from "@/lib/utils"
 import { useWebstoryStore } from "@/stores/webstoryStore"
 import type { TextComponent } from "@/types/webstory"
 import { Bold, ChevronLeft, FileText, Italic, Trash2, Underline } from "lucide-react"
@@ -31,7 +32,6 @@ export function TextConfig({ textComponent, onBack }: TextConfigProps) {
   const components = useWebstoryStore((state) => state.components)
   const setComponents = useWebstoryStore((state) => state.setComponents)
 
-  // Real-time update functions
   const updateContent = (content: string) => {
     updateComponent(textComponent.id, { content })
   }
@@ -64,6 +64,41 @@ export function TextConfig({ textComponent, onBack }: TextConfigProps) {
     updateComponent(textComponent.id, { alignment })
   }
 
+  const updateHeight = (height: string) => {
+    updateComponent(textComponent.id, { height })
+  }
+
+  const updateVerticalAlignment = (alignment: "top" | "center" | "bottom") => {
+    updateComponent(textComponent.id, { verticalAlignment: alignment })
+  }
+
+  const handleHeightInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value
+    if (rawValue === "") {
+      updateHeight("0px")
+      return
+    }
+    const numValue = parseInt(rawValue, 10)
+    if (!isNaN(numValue)) {
+      updateHeight(`${Math.max(0, numValue)}px`)
+    }
+  }
+
+  const handleFontSizeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value
+    if (rawValue === "") {
+      updateFontSize("0px")
+      return
+    }
+    const numValue = parseInt(rawValue, 10)
+    if (!isNaN(numValue)) {
+      updateFontSize(`${Math.max(0, numValue)}px`)
+    }
+  }
+
+  const displayFontSize = (parsePixelValue(textComponent.fontSize) ?? "").toString()
+  const displayHeightValue = (parsePixelValue(textComponent.height) ?? "").toString()
+
   const handleDelete = () => {
     const updatedComponents = components.filter((component) => component.id !== textComponent.id)
     setComponents(updatedComponents)
@@ -73,18 +108,15 @@ export function TextConfig({ textComponent, onBack }: TextConfigProps) {
   return (
     <div className="inset-0 pt-2 bg-sidebar">
       <Card className="p-3">
-        {/* Header with back button and title */}
         <div className="flex items-center mb-3">
           <Button variant="ghost" size="sm" onClick={onBack} className="mr-2 px-2">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
           </Button>
-
           <div className="flex items-center gap-2 flex-1">
             <FileText className="h-5 w-5 text-muted-foreground" />
             <h3 className="font-medium">Text Component</h3>
           </div>
-
           <Button
             variant="ghost"
             size="sm"
@@ -99,7 +131,7 @@ export function TextConfig({ textComponent, onBack }: TextConfigProps) {
         <Tabs defaultValue="content" className="w-full">
           <TabsList className="grid grid-cols-2 mb-4 h-9">
             <TabsTrigger value="content" className="text-xs px-1">
-              Content
+              General
             </TabsTrigger>
             <TabsTrigger value="style" className="text-xs px-1">
               Style
@@ -112,6 +144,36 @@ export function TextConfig({ textComponent, onBack }: TextConfigProps) {
               <Input id="text-content" value={textComponent.content} onChange={(e) => updateContent(e.target.value)} />
             </div>
 
+            <div>
+              <Label htmlFor="text-height-input">Height (px)</Label>
+              <Input
+                id="text-height-input"
+                type="number"
+                min="0"
+                placeholder="e.g., 100 (leave blank for auto)"
+                value={displayHeightValue}
+                onChange={handleHeightInputChange}
+                className="h-9"
+                aria-label="Text container height in pixels"
+              />
+            </div>
+            <div>
+              <Label htmlFor="text-vertical-alignment">Vertical Alignment</Label>
+              <Select
+                value={textComponent.verticalAlignment || "center"}
+                onValueChange={(value) => updateVerticalAlignment(value as "top" | "center" | "bottom")}
+              >
+                <SelectTrigger id="text-vertical-alignment" className="h-9">
+                  <SelectValue placeholder="Select vertical alignment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="top">Top</SelectItem>
+                  <SelectItem value="center">Center</SelectItem>
+                  <SelectItem value="bottom">Bottom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <ColorPickerField
               label="Background Color"
               value={textComponent.backgroundColor ?? ""}
@@ -121,10 +183,18 @@ export function TextConfig({ textComponent, onBack }: TextConfigProps) {
 
           <TabsContent value="style" className="space-y-4 mt-0">
             <div>
-              <Label htmlFor="font-size">Font Size</Label>
-              <Input id="font-size" value={textComponent.fontSize} onChange={(e) => updateFontSize(e.target.value)} />
+              <Label htmlFor="font-size">Font Size (px)</Label>
+              <Input
+                id="font-size"
+                type="number"
+                min="0"
+                placeholder="e.g., 16"
+                value={displayFontSize}
+                onChange={handleFontSizeInputChange}
+                className="h-9"
+                aria-label="Font size in pixels"
+              />
             </div>
-
             <div>
               <Label htmlFor="font-family">Font Family</Label>
               <Input
@@ -133,7 +203,6 @@ export function TextConfig({ textComponent, onBack }: TextConfigProps) {
                 onChange={(e) => updateFontFamily(e.target.value)}
               />
             </div>
-
             <div>
               <Label htmlFor="text-style">Text Style</Label>
               <div className="flex gap-1 mt-1">
@@ -169,14 +238,13 @@ export function TextConfig({ textComponent, onBack }: TextConfigProps) {
                 </Button>
               </div>
             </div>
-
             <div>
-              <Label htmlFor="text-alignment">Text Alignment</Label>
+              <Label htmlFor="text-alignment">Text Alignment (Horizontal)</Label>
               <Select
                 value={textComponent.alignment || "left"}
                 onValueChange={(value) => updateAlignment(value as "left" | "center" | "right")}
               >
-                <SelectTrigger id="text-alignment">
+                <SelectTrigger id="text-alignment" className="h-9">
                   <SelectValue placeholder="Select alignment" />
                 </SelectTrigger>
                 <SelectContent>
@@ -190,7 +258,6 @@ export function TextConfig({ textComponent, onBack }: TextConfigProps) {
         </Tabs>
       </Card>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

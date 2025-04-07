@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-import { HeaderComponent, TextComponent, TimelineComponent, WebstoryComponent } from "../types/webstory"
+import { HeaderComponent, PhotoTimelineComponent, TextComponent, WebstoryComponent } from "../types/webstory"
 
 type WebstoryState = {
   components: WebstoryComponent[]
@@ -27,7 +27,6 @@ export const useWebstoryStore = create<WebstoryState>((set) => ({
         return { components: [component, ...state.components] }
       }
 
-      // Append at the end
       return { components: [...state.components, component] }
     }),
 
@@ -39,8 +38,8 @@ export const useWebstoryStore = create<WebstoryState>((set) => ({
         if (component.type === "text") {
           return { ...component, ...updates } as TextComponent
         }
-        if (component.type === "timeline") {
-          return { ...component, ...updates } as TimelineComponent
+        if (component.type === "photoTimeline") {
+          return { ...component, ...updates } as PhotoTimelineComponent
         }
         if (component.type === "header") {
           return { ...component, ...updates } as HeaderComponent

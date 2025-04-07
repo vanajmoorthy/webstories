@@ -14,14 +14,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import pb from "@/lib/pocketbase"
 import { useWebstoryStore } from "@/stores/webstoryStore"
-import type { WebstoryComponent } from "@/types/webstory"
 import { Pencil, PlusCircle } from "lucide-react"
 import type { RecordModel } from "pocketbase"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 type Webstory = RecordModel & {
-  content: string // Changed from 'data' to 'content'
+  content: string
   title: string
   pageBackgroundColor?: string
 }
@@ -53,7 +52,6 @@ export default function HomePage() {
     fetchWebstories()
   }, [])
 
-  // When page color changes and sync is enabled, update header color
   useEffect(() => {
     if (syncColors) {
       setHeaderBackgroundColor(pageBackgroundColor)
@@ -61,7 +59,6 @@ export default function HomePage() {
   }, [pageBackgroundColor, syncColors])
 
   const loadWebstory = (story: Webstory) => {
-    // Parse components from content field
     const components = typeof story.content === "string" ? JSON.parse(story.content) : story.content
     setComponents(components)
     navigate(`/editor/${story.id}`)
@@ -167,7 +164,6 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* New Webstory Creation Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

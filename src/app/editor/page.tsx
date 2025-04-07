@@ -1,6 +1,7 @@
 import { AppSidebar } from "@/components/editor/AppSidebar"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { EditableHeader } from "@/components/webstory/EditableHeader"
+import { EditablePhotoTimeline } from "@/components/webstory/EditablePhotoTimeline"
 import { EditableText } from "@/components/webstory/EditableText"
 import { useToast } from "@/hooks/use-toast"
 import pb from "@/lib/pocketbase"
@@ -31,13 +32,10 @@ export default function Editor() {
         const webstory = await pb.collection("webstories").getOne(id)
         console.log("Loaded webstory:", webstory)
 
-        // Set the webstory title
         setWebstoryTitle(webstory.title || "Untitled Webstory")
 
-        // Set the page background color
         setPageBackgroundColor(webstory.pageBackgroundColor || "#ffffff")
 
-        // Set the components
         if (typeof webstory.content === "string") {
           setComponents(JSON.parse(webstory.content))
         } else {
@@ -49,7 +47,6 @@ export default function Editor() {
         console.error("Failed to load webstory", error)
         setIsLoading(false)
 
-        // Show error toast on load failure
         toast({
           variant: "destructive",
           title: "Error Loading Webstory",
@@ -73,7 +70,8 @@ export default function Editor() {
         return
       }
 
-      const user = pb.authStore.model
+      const user = pb.authStore.record
+
       if (!user) {
         toast({
           variant: "destructive",
@@ -90,7 +88,6 @@ export default function Editor() {
         pageBackgroundColor: pageBackgroundColor,
       })
 
-      // Success toast instead of alert
       toast({
         title: "Webstory Saved",
         description: "Your webstory has been saved successfully.",
@@ -98,7 +95,6 @@ export default function Editor() {
     } catch (error) {
       console.error("Failed to save webstory", error)
 
-      // Error toast
       toast({
         variant: "destructive",
         title: "Save Failed",
@@ -120,10 +116,10 @@ export default function Editor() {
       <AppSidebar
         pageBackgroundColor={pageBackgroundColor}
         webstoryTitle={webstoryTitle}
+        webstoryId={id}
         onPageBackgroundColorChange={setPageBackgroundColor}
         onWebstoryTitleChange={setWebstoryTitle}
         onSave={saveWebstory}
-        webstoryId={id}
       />
 
       <SidebarInset>
@@ -132,20 +128,13 @@ export default function Editor() {
         <main className="z-10 h-full overflow-auto rounded-xl" style={{ backgroundColor: pageBackgroundColor }}>
           {components.map((component) => {
             if (component.type === "header") {
-              return (
-                <EditableHeader
-                  key={component.id}
-                  id={component.id}
-                  heading={component.title}
-                  subheading={component.subtitle}
-                  backgroundColor={component.backgroundColor}
-                  titleStyle={component.titleStyle}
-                  subtitleStyle={component.subtitleStyle}
-                />
-              )
+              return <EditableHeader key={component.id} id={component.id} />
             }
             if (component.type === "text") {
-              return <EditableText key={component.id} id={component.id} content={component.content} />
+              return <EditableText key={component.id} id={component.id} />
+            }
+            if (component.type === "photoTimeline") {
+              return <EditablePhotoTimeline key={component.id} id={component.id} />
             }
             return null
           })}

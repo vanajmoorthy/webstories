@@ -33,7 +33,7 @@ export function usePhotoGallery() {
 
 interface PhotoGalleryProviderProps {
   children: ReactNode
-  webstoryId?: string // Make this optional to support both filtering by webstory and showing all user photos
+  webstoryId?: string
 }
 
 export function PhotoGalleryProvider({ children, webstoryId }: PhotoGalleryProviderProps) {
@@ -46,14 +46,12 @@ export function PhotoGalleryProvider({ children, webstoryId }: PhotoGalleryProvi
     setError(null)
 
     try {
-      // Make sure we have an authenticated user
       if (!pb.authStore.isValid) {
         setPhotos([])
         setError(new Error("You must be logged in to view photos"))
         return
       }
 
-      // Build the filter based on whether we have a webstoryId
       let filter = `user = "${pb.authStore.model?.id}"`
       if (webstoryId) {
         filter += ` && webstory_id = "${webstoryId}"`
@@ -62,7 +60,7 @@ export function PhotoGalleryProvider({ children, webstoryId }: PhotoGalleryProvi
       const records = await pb.collection("photos").getList(1, 100, {
         sort: "-created",
         filter: filter,
-        expand: "user,webstory_id", // Expand relations if needed
+        expand: "user,webstory_id",
       })
 
       const formattedPhotos = records.items.map((record) => ({
@@ -98,7 +96,7 @@ export function PhotoGalleryProvider({ children, webstoryId }: PhotoGalleryProvi
 
   useEffect(() => {
     fetchPhotos()
-  }, [webstoryId]) // Re-fetch when webstoryId changes
+  }, [webstoryId])
 
   const value = {
     photos,

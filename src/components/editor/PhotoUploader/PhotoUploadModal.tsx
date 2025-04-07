@@ -16,7 +16,6 @@ interface PhotoUploadModalProps {
 export function PhotoUploadModal({ open, onOpenChange, onPhotoSelect, webstoryId }: PhotoUploadModalProps) {
   const [activeTab, setActiveTab] = useState("upload")
 
-  // Reset to upload tab when modal opens
   useEffect(() => {
     if (open) {
       setActiveTab("upload")

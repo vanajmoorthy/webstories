@@ -12,6 +12,11 @@ interface PhotoUploaderProps {
   webstoryId: string
 }
 
+interface UploadProgressEvent {
+  loaded: number
+  total?: number
+}
+
 export function PhotoUploader({ webstoryId }: PhotoUploaderProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
@@ -19,12 +24,10 @@ export function PhotoUploader({ webstoryId }: PhotoUploaderProps) {
   const { toast } = useToast()
   const { refreshPhotos } = usePhotoGallery()
 
-  // Handle file drop
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       if (acceptedFiles.length === 0) return
 
-      // Check if user is authenticated
       if (!pb.authStore.isValid) {
         toast({
           variant: "destructive",
@@ -34,7 +37,6 @@ export function PhotoUploader({ webstoryId }: PhotoUploaderProps) {
         return
       }
 
-      // Check if webstoryId is provided
       if (!webstoryId) {
         toast({
           variant: "destructive",
@@ -54,18 +56,15 @@ export function PhotoUploader({ webstoryId }: PhotoUploaderProps) {
       const uploadPromises = acceptedFiles.map(async (file) => {
         const formData = new FormData()
 
-        // Add the file
         formData.append("file", file)
 
-        // Add required fields - make sure these match your PocketBase collection field names exactly
         formData.append("filename", file.name)
-        formData.append("user", pb.authStore.model?.id || "")
+        formData.append("user", pb.authStore.record?.id || "")
         formData.append("webstory_id", webstoryId)
 
         try {
-          // Create a record with the file
           await pb.collection("photos").create(formData, {
-            onUploadProgress: (progressEvent) => {
+            onUploadProgress: (progressEvent: UploadProgressEvent) => {
               if (progressEvent.total) {
                 const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
                 setUploadProgress((prev) => ({
@@ -98,7 +97,6 @@ export function PhotoUploader({ webstoryId }: PhotoUploaderProps) {
             description: `Successfully uploaded ${successCount} photo${successCount > 1 ? "s" : ""}.`,
           })
 
-          // Refresh the photo gallery
           refreshPhotos()
         }
       } catch (error) {
@@ -153,7 +151,7 @@ export function PhotoUploader({ webstoryId }: PhotoUploaderProps) {
 
       {Object.keys(uploadProgress).length > 0 && (
         <div className="w-full mt-6 space-y-2">
-          {Object.entries(uploadProgress).map(([filename, progress]) => (
+          {Object.entries(uploadProgress).map(([filename, progress]: [string, number]) => (
             <div key={filename} className="w-full">
               <div className="flex justify-between text-xs mb-1">
                 <span className="truncate max-w-[200px]">{filename}</span>
