@@ -37,4 +37,6 @@ public/images/*/*
 # Keep the files inside the resized directories
 !public/images/*/resized/*
 
-pb
+pb/pb_data
+pb/pocketbase
+
