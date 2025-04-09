@@ -282,7 +282,7 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" onClick={openSettingsModal} aria-label="Open webstory settings">
               <div
-                className={`flex aspect-square size-8 flex-shrink-0 items-center justify-center rounded-lg  border border-gray-400  ${textColorClass}`}
+                className={`flex aspect-square size-8 flex-shrink-0 items-center justify-center rounded-lg  border border-gray-200  ${textColorClass}`}
                 style={{ backgroundColor: pageBackgroundColor }}
               >
                 {webstoryTitle.charAt(0).toUpperCase()}

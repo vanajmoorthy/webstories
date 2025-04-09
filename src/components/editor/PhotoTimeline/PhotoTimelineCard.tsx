@@ -32,7 +32,7 @@ export function PhotoTimelineCard({
       <Card className="cursor-pointer">
         <CardContent className="p-3 flex items-center gap-3">
           <div
-            className="flex items-center justify-center h-8 w-8 rounded-md flex-shrink-0 border border-gray-400"
+            className="flex items-center justify-center h-8 w-8 rounded-md flex-shrink-0 border border-gray-200"
             style={{ backgroundColor: bgColor }}
           >
             <Clock className={`h-4 w-4 ${textColorClass}`} />

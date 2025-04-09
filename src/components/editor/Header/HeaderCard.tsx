@@ -18,6 +18,7 @@ export function HeaderCard({ onClick }: HeaderCardProps) {
   const subtitle = headerComponent?.subtitle || "Subtitle"
 
   let combinedText = `${title} / ${subtitle}`
+
   if (combinedText.length > 37) {
     combinedText = combinedText.slice(0, 37) + "..."
   }
@@ -26,7 +27,7 @@ export function HeaderCard({ onClick }: HeaderCardProps) {
     <Card className="mt-2 cursor-pointer hover:shadow-md transition-shadow" onClick={onClick}>
       <CardContent className="p-3 flex items-center gap-3">
         <div
-          className="flex items-center justify-center h-8 w-8 rounded-md border border-gray-400"
+          className="flex items-center justify-center h-8 w-8 rounded-md border border-gray-200"
           style={{ backgroundColor: bgColor }}
         >
           <Type className={`h-4 w-4 ${textColorClass}`} />
